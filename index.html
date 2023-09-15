@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #F9F9F9;
+        }
+        .container {
+            background-color: #FFFFFF;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin-top: 50px;
+        }
+        h1 {
+            color: #EA4020;
+        }
+        .btn-primary {
+            background-color: #EA4020;
+            border-color: #EA4020;
+        }
+        .btn-primary:hover {
+            background-color: #FF6347;
+            border-color: #FF6347;
+        }
+        #nome1, #nome2 {
+            font-size: 18px;
+            color: #EA4020;
+        }
+    </style>
+    <title>Sorteio de Nomes</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="mb-4">Sorteio de Nomes</h1>
+        <input type="file" id="fileInput" accept=".xlsx, .xls" class="form-control mb-3">
+        <button id="sortearButton" class="btn btn-primary">Sortear Nomes</button>
+        <div class="mt-4">
+            <h2>Nomes Sorteados:</h2>
+            <p id="nome1"></p>
+            <p id="nome2"></p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.5.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script>
+        document.getElementById('sortearButton').addEventListener('click', function() {
+            const fileInput = document.getElementById('fileInput');
+            const nome1Display = document.getElementById('nome1');
+            const nome2Display = document.getElementById('nome2');
+
+            if (fileInput.files.length === 0) {
+                alert('Por favor, selecione um arquivo Excel (.xlsx ou .xls).');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                if (workbook.SheetNames.length === 0) {
+                    alert('O arquivo Excel não contém nenhuma planilha.');
+                    return;
+                }
+
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const nomes = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                if (nomes.length < 2) {
+                    alert('A planilha precisa ter pelo menos dois nomes.');
+                    return;
+                }
+
+                const nome1 = getRandomNome(nomes);
+                let nome2 = getRandomNome(nomes);
+                while (nome2 === nome1) {
+                    nome2 = getRandomNome(nomes);
+                }
+
+                nome1Display.textContent = `Nome 1: ${nome1[0]}`;
+                nome2Display.textContent = `Nome 2: ${nome2[0]}`;
+
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+
+        function getRandomNome(nomes) {
+            const index = Math.floor(Math.random() * nomes.length);
+            return nomes[index];
+        }
+		
+    </script>
+</body>
+</html>
